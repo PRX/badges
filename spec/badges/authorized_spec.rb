@@ -28,22 +28,22 @@ describe Badges::Authorized do
   
   it "returns a list of authorizations by the authorized" do
     @user = User.new(2)
-    @user.authorizations.should == [Badges::Authorization.new('admin', @user, Account.new(1)), Badges::Authorization.new('member', @user)]
+    @user.authorizations.should == [Badges::Authorization.new(:admin, @user, Account.new(1)), Badges::Authorization.new(:member, @user)]
   end
   
   it "grants a role" do
     @user = User.new(4)
     @user.authorizations.should == []
     @user.grant_role(:super_user)
-    @user.roles_on.should == ['super_user']
+    @user.roles_on.should == [:super_user]
   end
   
   
   it "revokes a role" do
     @user = User.new(1)
-    @user.roles_on.should == ['admin', 'member']
-    @user.revoke_role('admin')
-    @user.roles_on.should == ['member']
+    @user.roles_on.should == [:admin, :member]
+    @user.revoke_role(:admin)
+    @user.roles_on.should == [:member]
   end
   
   it "has privilege from global role" do
@@ -51,14 +51,14 @@ describe Badges::Authorized do
   end
   
   it "returns roles" do
-    User.new(1).roles_on.should == ['admin', 'member']
+    User.new(1).roles_on.should == [:admin, :member]
     User.new(1).roles_on(Account.new(1)).should == []
 
-    User.new(2).roles_on.should == ['member']
-    User.new(2).roles_on(Account.new(1)).should == ['admin']
+    User.new(2).roles_on.should == [:member]
+    User.new(2).roles_on(Account.new(1)).should == [:admin]
 
-    User.new(3).roles_on.should == ['member']
-    User.new(3).roles_on(Account).should == ['admin']
+    User.new(3).roles_on.should == [:member]
+    User.new(3).roles_on(Account).should == [:admin]
   end
   
 

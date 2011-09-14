@@ -26,21 +26,29 @@ module Badges
       def grant_role(role_symbol, authorized, authorizable=nil)
         @roles[role_symbol.to_s] = [] unless @roles.has_key?(role_symbol.to_s)
         role = {:role => role_symbol.to_s}
-        role[:on] = on_hash(authorizable) if authorizable
+        role[:on] = hash_for(authorizable) if authorizable
         @by_roles[authorized.id.to_s] = [] unless @by_roles.has_key?(authorized.id.to_s)
         @by_roles[authorized.id.to_s] << role
-        role
+        
+        if authorizable && !authorizable.is_a?(Class)
+          role = {:role=>role_symbol.to_s}
+          role[:by] = hash_for(authorized)
+          @on_roles[authorizable.id.to_s] = [] unless @on_roles[authorizable.id.to_s]
+          @on_roles[authorizable.id.to_s] << role
+        end
+        
+        true
       end
       
       def revoke_role(role_symbol, authorized, authorizable=nil)
         @by_roles[authorized.id.to_s].delete_if do |user_role|
           (user_role[:role] == role_symbol.to_s) && 
           ( (authorizable.nil? && user_role[:on].nil?) ||
-            (authorizable && user_role[:on] && (on_hash(authorizable) == user_role[:on])) )
+            (authorizable && user_role[:on] && (hash_for(authorizable) == user_role[:on])) )
         end
       end
       
-      def on_hash(authorizable=nil)
+      def hash_for(authorizable=nil)
         return {} unless authorizable
         if authorizable.is_a?(Class)
           {:class=>authorizable.name}

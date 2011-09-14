@@ -56,14 +56,14 @@ describe Badges::AuthorizationEngine do
     @user = User.new(4)
     @user.authorizations.should == []
     engine.grant_role(:super_user, @user)
-    @user.roles_on.should == ['super_user']
+    @user.roles_on.should == [:super_user]
   end
   
   it "revokes a new global role" do
     @user = User.new(1)
-    @user.roles_on.should == ['admin', 'member']
-    engine.revoke_role('admin', @user)
-    @user.roles_on.should == ['member']
+    @user.roles_on.should == [:admin, :member]
+    engine.revoke_role(:admin, @user)
+    @user.roles_on.should == [:member]
   end
   
   it "lists authorizations by authorizable" do
@@ -71,11 +71,16 @@ describe Badges::AuthorizationEngine do
     # puts "auths #{auths.inspect}"
     auths.count.should == 2
   end
-
+  
   it "lists authorizations by authorized" do
     auths = engine.authorizations_on(Account.new(1))
     # puts "auths #{auths.inspect}"
     auths.count.should == 1
+  end
+  
+
+  it "lists class of authorizeds by authorizable" do
+    engine.authorizeds(Account.new(1), User).should == [User.new(2)]
   end
   
 end

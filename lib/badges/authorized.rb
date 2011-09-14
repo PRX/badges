@@ -43,7 +43,7 @@ module Badges
               is_user_role_on_class?(user_role, authorizable) ||
               is_user_role_on_instance?(user_role, authorizable))
             
-            result << user_role[:role].to_s 
+            result << user_role[:role].to_sym
             
           end
           result
@@ -52,7 +52,7 @@ module Badges
 
       # check if authorized has the role on this (instance, class, or nil/global) authorizable
       def has_role?(role_symbol, authorizable=nil)
-        self.roles_on(authorizable).include?(role_symbol.to_s)
+        self.roles_on(authorizable).include?(role_symbol.to_sym)
       end
 
       # private

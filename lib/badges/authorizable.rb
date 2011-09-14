@@ -39,13 +39,11 @@ module Badges
         authorized.has_privilege?(privilege, self)
       end
       
-      def role_granted(role_name, authorized=nil)
-        authorized ||= (current_user || Anonymous.instance)
+      def role_granted(role_name, authorized)
         authorized.grant_role(role_name, self)
       end
       
-      def role_revoked(role_name, authorized=nil)
-        authorized ||= (current_user || Anonymous.instance)
+      def role_revoked(role_name, authorized)
         authorized.revoke_role(role_name, self)
       end
       

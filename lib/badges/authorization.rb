@@ -9,7 +9,7 @@ module Badges
     alias :on= :authorizable=
     
     def initialize(role, authorized=nil, authorizable=nil)
-      @role = role
+      @role = role.to_sym
       @authorized = authorized
       @authorizable = authorizable
     end

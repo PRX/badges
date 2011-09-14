@@ -96,10 +96,13 @@ module Badges
 
     def authorizeds(authorizable, authorized_class, privilege=nil)
       ids = authorizable_roles(authorizable).inject([]) do |result, role|
-        if (role[:on] && role[:on][:class] && role[:on][:id])
-          if (role[:on][:class] == authorized_class.name) 
+        if (role[:by] && role[:by][:class] && role[:by][:id])
+          # puts "authorizeds: role:#{role.inspect}"
+          if (role[:by][:class] == authorized_class.name) 
+            # puts "authorizeds: class matches"
             if !privilege || (@storage.find_roles[role[:role].to_s] || []).include?(privilege)
-              result << role[:on][:id]
+              # puts "authorizeds: priv is nil or compatible"
+              result << role[:by][:id]
             end
           end
         end
