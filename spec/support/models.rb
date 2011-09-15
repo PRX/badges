@@ -14,7 +14,11 @@ class TestModel
   end
   
   def self.find ids
-    ids.collect{|i| self.new(i)}
+    if ids.is_a?(Array)
+      ids.collect{|i| self.new(i)}
+    else
+      self.new(ids)
+    end
   end
   
 end

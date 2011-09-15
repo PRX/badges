@@ -113,7 +113,7 @@ module Badges
       elsif options[:on]
         raise "Could not decipher the :on expression to determine a authorizable object."
       end
-      authorizable
+      authorizable.is_a?(Array) ? authorizable.first : authorizable
     end
     
     def get_by_method_or_attribute(name)
