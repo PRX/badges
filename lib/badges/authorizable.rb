@@ -57,12 +57,14 @@ module Badges
 
       def members(role=nil)
         result = unless role
-          authorizations.collect{|auth| auth.by}
+          authorizations.collect{|auth| auth.by }
         else
-          authorizations.inject([]){|l, auth| l << auth.by if (auth.role == role) }
+          authorizations.inject([]){|l, auth| l << auth.by if (auth.role.to_sym == role.to_sym) }
         end
         result.uniq
       end
+      
+      private
       
       def engine
         Badges::AuthorizationEngine.instance

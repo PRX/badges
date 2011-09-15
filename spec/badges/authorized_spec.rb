@@ -62,11 +62,13 @@ describe Badges::Authorized do
   end
   
 
+  it "has privilege from role on class" do
+    User.new(3).should have_privilege('delete', Account)
+  end
+
 # it "has privilege from role on object" do
 # end
 # 
-# it "has privilege from role on class" do
-# end
 
   it "has role on authorizable" do
     User.new(2).should have_role(:admin, Account.new(1))

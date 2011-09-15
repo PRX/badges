@@ -29,10 +29,14 @@ module Badges
       privilege = privilege.to_s
       add_if_missing(privilege)
       
-      privileges = privilege_lookup(authorized)[privilege]
-      on = authorizable ? privileges[authorizable.class.name] : nil
+      privileges = privilege_lookup(authorized)[privilege] || {}
+      on = authorizable ? privileges[authorizable_class_name(authorizable)] || [] : []
       
-      privileges && ( privileges[:all] || (on && (on.include?(:all) || on.include?(authorizable.id))) )
+      privileges[:all] || (on.include?(:all) || (authorizable && !authorizable.is_a?(Class) && on.include?(authorizable.id)))
+    end
+    
+    def authorizable_class_name(authorizable)
+      authorizable.is_a?(Class) ? authorizable.name : authorizable.class.name
     end
     
     #  return list of Badges:Authoriation instances
@@ -62,38 +66,6 @@ module Badges
       @storage.find_authorizable_roles(authorizable)
     end
     
-    def replace_instances(roles, key)
-      # puts "replace_instances roles:#{roles.inspect}, key:#{key}"
-      by_class = roles.inject({}) do |groups, auth|
-        
-        if auth[key]
-          name = auth[key][:class]
-          if auth[key][:id]
-            id = auth[key][:id]
-            groups[name] = {} if groups[name].nil?
-            groups[name][id] = [] if groups[name][id].nil?
-            groups[name][id] << auth
-          else
-            auth[key] = name.constantize
-          end
-        end
-        
-        groups
-      end
-      
-      # puts "by_class = #{by_class.inspect}"
-
-      by_class.keys.each do |name|
-        ids = by_class[name].keys
-        klass = name.constantize
-        instances = klass.respond_to?(:find) ? Array(klass.find(ids)) : []
-        # puts "instances: #{instances.inspect}"
-        instances.each{|i| by_class[name][i.id].each{ |a| a[key] = i } }
-      end
-
-      roles
-    end
-
     def authorizeds(authorizable, authorized_class, privilege=nil)
       ids = authorizable_roles(authorizable).inject([]) do |result, role|
         if (role[:by] && role[:by][:class] && role[:by][:id])
@@ -144,7 +116,11 @@ module Badges
       result = {}
       all_roles = @storage.find_roles
       self.authorized_roles(authorized).each do |role|
-        all_roles[role[:role]].each do |privilege|
+
+        # puts "create_privilege_lookup:       role: #{role.inspect}"
+        # puts "create_privilege_lookup: privileges: #{all_roles[role[:role].to_s].inspect}"
+
+        all_roles[role[:role].to_s].each do |privilege|
           result[privilege] ||= {}
           if role[:on]
             object_class = role[:on][:class]
@@ -159,15 +135,44 @@ module Badges
       result
       
     end
+
+    def replace_instances(roles, key)
+      # puts "replace_instances roles:#{roles.inspect}, key:#{key}"
+      by_class = roles.inject({}) do |groups, auth|
+        
+        if auth[key]
+          name = auth[key][:class]
+          if auth[key][:id]
+            id = auth[key][:id]
+            groups[name] = {} if groups[name].nil?
+            groups[name][id] = [] if groups[name][id].nil?
+            groups[name][id] << auth
+          else
+            auth[key] = name.constantize
+          end
+        end
+        
+        groups
+      end
+      
+      # puts "by_class = #{by_class.inspect}"
+
+      by_class.keys.each do |name|
+        ids = by_class[name].keys
+        klass = name.constantize
+        instances = klass.respond_to?(:find) ? Array(klass.find(ids)) : []
+        # puts "instances: #{instances.inspect}"
+        instances.each{|i| by_class[name][i.id].each{ |a| a[key] = i } }
+      end
+
+      roles
+    end
     
     def add_if_missing(privilege)
-      # p = Badges::Privilege.find_by_name(privilege.to_s)
-      # if Badges::Config.create_when_missing && p.nil?
-      #   p = Badges::Privilege.create(:name=>privilege.to_s)
-      # end
-      # p
+      if Badges::Configuration.create_when_missing && !@storage.privileges.include?(privilege)
+        @storage.add_privilege(privilege, Badges::Configuration.default_admin_role) 
+      end
     end
-      
     
   end
 end

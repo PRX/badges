@@ -13,8 +13,11 @@ if defined?(Rails) && defined?(Rails::Railtie)
         require 'badges'
 
         ActionController::Base.send :before_filter, :propogate_current_user
-        ActionController::Base.send :include, Badges::AuthorizeHandler
-        ActiveRecord::Base.send :include, Badges::Authorized, Badges::Authorizable, Badges::ModelAuthorization
+        ActionController::Base.send :include, Badges::ControllerAuthorization
+
+        if defined?(ActiveRecord::Base)
+          ActiveRecord::Base.send :include, Badges::Authorized, Badges::Authorizable, Badges::ModelAuthorization
+        end
 
       end
     

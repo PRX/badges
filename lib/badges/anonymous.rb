@@ -1,5 +1,4 @@
 require 'singleton'
-require 'authorized'
 
 module Badges
   class Anonymous

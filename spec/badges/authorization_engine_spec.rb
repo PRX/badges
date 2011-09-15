@@ -26,12 +26,22 @@ describe Badges::AuthorizationEngine do
     engine.authorized_roles(User.new(2)).should == [{:role=>'admin', :on=>{:class=>'Account', :id=>1}}, {:role=>'member'}]
   end
   
+  it "should return roles for anonymous user" do
+    engine.authorized_roles(nil).should == [{:role=>:anonymous}]
+    engine.anonymous_roles.should == [{:role=>:anonymous}]
+  end
+
   it "returns roles for an authorizable object" do
     engine.authorizable_roles(Account.new(1)).should == [{:role=>'admin', :by=>{:class=>'User', :id=>2}}]
   end
   
   it "checks a privilege for a user" do
     engine.should have_privilege(:view, User.new(1))
+  end
+
+  it "has privilege from role on class" do
+    engine.create_privilege_lookup(User.new(3)).should == {"edit"=>{:all=>true, "Account"=>[:all]}, "delete"=>{"Account"=>[:all]}, "view"=>{:all=>true, "Account"=>[:all]}}
+    engine.should have_privilege(:delete, User.new(3), Account)
   end
   
   it "returns authorizable ids for user and class" do

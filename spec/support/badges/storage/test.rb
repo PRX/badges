@@ -11,6 +11,27 @@ module Badges
       end
       alias :find_roles :roles
 
+      def add_role(name)
+        role = name.to_s
+        @roles[role] = [] unless @roles.has_key?(role)
+      end
+
+      def delete_role(name)
+        role = name.to_s
+        @roles.delete(role)
+      end
+
+      def privileges
+        deep_copy(@privileges)
+      end
+      
+      def add_privilege(privilege, role=nil)
+        @privileges << privilege unless @privileges.include?(privilege)
+        if role
+          @roles[role] << privilege unless @roles[role].include?(privilege)
+        end
+      end
+
       def by_roles
         deep_copy(@by_roles)
       end

@@ -48,7 +48,7 @@ describe Badges::Authorized do
 
     @account.role_granted(:super_user, @user)
 
-    @user.roles_on(@account).should == ['super_user']
+    @user.roles_on(@account).should == [:super_user]
   end
   
   
@@ -56,7 +56,7 @@ describe Badges::Authorized do
     @account = Account.new(1)
     @user = User.new(2)
 
-    @user.roles_on(@account).should == ['admin']
+    @user.roles_on(@account).should == [:admin]
 
     @account.role_revoked(:admin, @user)
 
@@ -77,7 +77,11 @@ describe Badges::Authorized do
     @account.members_by_role.should == {:admin=>[User.new(5), User.new(6), User.new(7)], :member=>[User.new(8), User.new(9), User.new(10)]}
     
   end
-  
+
+  it 'can return all authorized users' do
+    Account.new(1).members(:admin).should == [User.new(2)]
+    Account.new(2).members(:admin).should == []
+  end
   
   # it "has privilege from role on object" do
   # end
