@@ -14,13 +14,14 @@ end
 
 TestApp::Application.initialize!
 
-require 'application_controller'
-
 module Badges
   
-  class TestAuthorizationController < ApplicationController
+  class TestAuthorizationController < ActionController::Base
 
     def rescue_action(e); raise e; end
+
+    def current_user; @current_user; end
+    def current_user=(user); @current_user = user; end
 
     def self._routes
       Rails.application.routes
