@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/../spec_helper'
-require File.dirname(__FILE__) + '/../controller_spec_helper'
+require File.dirname(__FILE__) + '/../action_controller_spec_helper'
 
 describe Badges::TestAuthorizationController, {:type => :controller} do
   
