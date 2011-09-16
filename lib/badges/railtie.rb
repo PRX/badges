@@ -1,7 +1,7 @@
 begin
   require 'rails'
 rescue LoadError=>err
-  puts "No 'rails' gem to require."
+  # puts "No 'rails' gem to require."
 end
 
 if defined?(Rails) && defined?(Rails::Railtie)
@@ -26,6 +26,6 @@ if defined?(Rails) && defined?(Rails::Railtie)
 
 else
 
-  puts "Rails::Railtie not supported; Badges::Railtie not installed."
+  # puts "Rails::Railtie not supported; Badges::Railtie not installed."
 
 end

@@ -1,7 +1,24 @@
 require File.dirname(__FILE__) + '/../spec_helper'
-require File.dirname(__FILE__) + '/../model_spec_helper'
+require File.dirname(__FILE__) + '/../active_record_spec_helper'
 
 describe Badges::ModelAuthorization do
+
+  before(:all) do
+
+    module Badges
+      class TestProject < ActiveRecord::Base
+        set_table_name "badges_test_projects"
+
+        include Badges::Authorizable
+        include Badges::ModelAuthorization
+        authorizable
+
+        attr_accessor :peer, :owner
+      end
+    end
+
+    ActiveRecord::Base.connection.execute('delete from badges_test_projects')
+  end 
 
   before(:each) do 
     engine.storage.roles =  { 'anonymous' =>['view'],

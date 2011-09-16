@@ -9,7 +9,7 @@ module Badges
 
     def initialize(options={})
       storage_type = options[:storage] || Badges::Configuration.storage || :test
-      storage_class = "Badges::Storage::#{storage_type.to_s.capitalize}".constantize
+      storage_class = "Badges::Storage::#{storage_type.to_s.capitalize}Store".constantize
       @storage = storage_class.new(options)
     end
     
@@ -72,7 +72,7 @@ module Badges
           # puts "authorizeds: role:#{role.inspect}"
           if (role[:by][:class] == authorized_class.name) 
             # puts "authorizeds: class matches"
-            if !privilege || (@storage.find_roles[role[:role].to_s] || []).include?(privilege)
+            if !privilege || (@storage.roles[role[:role].to_s] || []).include?(privilege)
               # puts "authorizeds: priv is nil or compatible"
               result << role[:by][:id]
             end
@@ -114,7 +114,7 @@ module Badges
     # this should be the same, just needs to be put in the cache
     def create_privilege_lookup(authorized=nil)
       result = {}
-      all_roles = @storage.find_roles
+      all_roles = @storage.roles
       self.authorized_roles(authorized).each do |role|
 
         # puts "create_privilege_lookup:       role: #{role.inspect}"

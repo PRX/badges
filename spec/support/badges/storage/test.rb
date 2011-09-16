@@ -1,15 +1,20 @@
 # load the roles, privileges, and uers/role mappings from these hard coded values
 # puts "loading Badges:Storage:Test"
+require 'badges/storage/abstract'
+
 module Badges
   module Storage
     class Test < Abstract
       
       attr_writer :roles, :by_roles, :on_roles
       
+      def initialize(options)
+        super
+      end
+
       def roles
         deep_copy(@roles)
       end
-      alias :find_roles :roles
 
       def add_role(name)
         role = name.to_s
@@ -32,18 +37,10 @@ module Badges
         end
       end
 
-      def by_roles
-        deep_copy(@by_roles)
+      def delete_privilege(privilege, role=nil)
+        raise "delete_privilege not implemented"
       end
-      
-      def on_roles
-        deep_copy(@on_roles)
-      end
-      
-      def initialize(options)
-        super
-      end
-      
+
       def grant_role(role_symbol, authorized, authorizable=nil)
         @roles[role_symbol.to_s] = [] unless @roles.has_key?(role_symbol.to_s)
         role = {:role => role_symbol.to_s}
@@ -69,15 +66,6 @@ module Badges
         end
       end
       
-      def hash_for(authorizable=nil)
-        return {} unless authorizable
-        if authorizable.is_a?(Class)
-          {:class=>authorizable.name}
-        else
-          {:class=>authorizable.class.name, :id=>authorizable.id}
-        end
-      end
-      
       def find_authorized_roles(authorized)
         deep_copy(@by_roles[authorized.id.to_s]) || []
       end
@@ -86,6 +74,16 @@ module Badges
         deep_copy(@on_roles[authorizable.id.to_s]) || []
       end
       
+      protected
+      
+      def by_roles
+        deep_copy(@by_roles)
+      end
+      
+      def on_roles
+        deep_copy(@on_roles)
+      end
+
       def deep_copy( object )
         Marshal.load( Marshal.dump( object ) )
       end

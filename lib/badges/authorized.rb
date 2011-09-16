@@ -10,10 +10,26 @@ module Badges
       def authorized
         include Badges::Authorized::InstanceMethods
       end
+      
+      def badges_class_name
+        if self.respond_to?('base_class')
+          self.base_class.name
+        else
+          self.name
+        end
+      end
 
     end
 
     module InstanceMethods
+      
+      def badges_id
+        self.id
+      end
+
+      def badges_class_name
+        self.class.badges_class_name
+      end
       
       # return list of roles, and what they are on
       def authorizations

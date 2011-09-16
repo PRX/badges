@@ -2,6 +2,7 @@ ENV['RAILS_ENV']='test'
 
 require "rubygems"
 require 'bundler/setup'
+require 'active_support'
 
 require 'rspec'
 require 'rspec/autorun'
