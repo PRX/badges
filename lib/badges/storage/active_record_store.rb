@@ -2,6 +2,7 @@
 require 'active_support'
 require 'active_record'
 
+require 'badges/storage/abstract'
 require 'badges/storage/active_record/base'
 require 'badges/storage/active_record/privilege'
 require 'badges/storage/active_record/role_privilege'

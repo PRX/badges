@@ -8,8 +8,11 @@ module Badges
     attr_reader :storage
 
     def initialize(options={})
-      storage_type = options[:storage] || Badges::Configuration.storage || :test
-      storage_class = "Badges::Storage::#{storage_type.to_s.capitalize}Store".constantize
+      storage_type = options[:storage] || Badges::Configuration.storage || :active_record
+      require "badges/storage/#{storage_type}_store"
+      storage_class_name = "Badges::Storage::#{storage_type.to_s.camelize}Store"
+      puts "storage_class_name: #{storage_class_name}"
+      storage_class = storage_class_name.constantize
       @storage = storage_class.new(options)
     end
     
