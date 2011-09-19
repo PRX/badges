@@ -3,7 +3,7 @@ module Badges
   module ControllerAuthorization
 
     def self.included(base)
-      include Rails.application.routes.url_helpers if defined?(Rails)
+      include Rails.application.routes.url_helpers if defined?(Rails.application)
       base.extend(ClassMethods)
       if base.respond_to?(:helper_method)
         base.send :helper_method, :has_privilege?

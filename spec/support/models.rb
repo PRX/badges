@@ -25,8 +25,11 @@ end
 
 class User < TestModel
   authorized
+  authorizable
 end
 
 class Account < TestModel
   authorizable
+  
+  attr_accessor :owner
 end

@@ -9,6 +9,7 @@ module Badges
   autoload :Configuration, 'badges/configuration'
   autoload :AuthorizationEngine, 'badges/authorization_engine'
   autoload :Authorizable, 'badges/authorizable'
+  autoload :ModelExtensions, 'badges/model_extensions'
   autoload :Authorized, 'badges/authorized'
   autoload :Authorization, 'badges/authorization'
   autoload :Anonymous, 'badges/anonymous'

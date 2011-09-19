@@ -18,12 +18,23 @@ module Badges
       
       AuthorizationClass = Badges::Storage::ActiveRecord::Authorization
       
+      def self.find_instances(model_class, ids)
+        if model_class.respond_to?(:where)
+        else
+          model_class.find(:all, :condition=>[model_class.])
+        end
+      end
+
       def initialize(options={})
         super
       end
+
+      def role_names
+        Role.all.collect{|r| r.name.to_s}.uniq || []
+      end
       
       def roles
-        Role.all.collect{|r| r.name} || []
+        Role.all.inject({}){|h, r| h[r.name.to_s] = r.privileges.collect{|p| p.name.to_s}.uniq || []; h} || {}
       end
 
       def add_role(name)
@@ -114,7 +125,6 @@ module Badges
         end
       end
       
-
       private
       
       def authorization_hash(role_name, authorized, authorizable)

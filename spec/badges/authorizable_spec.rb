@@ -28,7 +28,7 @@ describe Badges::Authorized do
   
   it "gets authorizations for this instance" do
     @account = Account.new(1)
-    @account.authorizations.should == [Badges::Authorization.new('admin', User.new(2), @account)]
+    @account.authorizations_on.should == [Badges::Authorization.new('admin', User.new(2), @account)]
   end
   
   it "gets authorized folks for this instance" do
@@ -44,7 +44,7 @@ describe Badges::Authorized do
     @account = Account.new(4)
     @user = User.new(4)
 
-    @user.authorizations.should == []
+    @user.authorizations_on.should == []
 
     @account.role_granted(:super_user, @user)
 

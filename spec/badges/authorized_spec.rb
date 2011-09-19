@@ -22,23 +22,37 @@ describe Badges::Authorized do
     User.should respond_to(:authorized)
   end
   
+  it "can declare a role on a class based on a block" do
+    User.class_eval do
+      has_role(:model_admin, Account) {|user, account| account.owner == user}
+    end
+    User.badges_model_class_roles.keys.size.should eql(1)
+    User.badges_model_class_roles['Account'].size.should eql(1)
+
+    User.class_eval do
+      has_role(:model_member, Account) {|user, account| account.id == user.id}
+    end
+
+    User.badges_model_class_roles.keys.size.should eql(1)
+    User.badges_model_class_roles['Account'].size.should eql(2)
+  end
+
   it "adds methods to user instances" do
     User.new.should respond_to(:has_privilege?)
   end
   
   it "returns a list of authorizations by the authorized" do
     @user = User.new(2)
-    @user.authorizations.should == [Badges::Authorization.new(:admin, @user, Account.new(1)), Badges::Authorization.new(:member, @user)]
+    @user.authorizations_by.should == [Badges::Authorization.new(:admin, @user, Account.new(1)), Badges::Authorization.new(:member, @user)]
   end
   
   it "grants a role" do
     @user = User.new(4)
-    @user.authorizations.should == []
+    @user.authorizations_by.should == []
     @user.grant_role(:super_user)
     @user.roles_on.should == [:super_user]
   end
-  
-  
+
   it "revokes a role" do
     @user = User.new(1)
     @user.roles_on.should == [:admin, :member]

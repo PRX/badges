@@ -1,15 +1,20 @@
 module Badges
   module Authorizable
     
+    autoload :ModelExtensions, 'badges/model_extensions'
+
     def self.included(base) # :nodoc:
+      base.extend Badges::ModelExtensions::ClassMethods unless (base < Badges::ModelExtensions::ClassMethods)
       base.extend ClassMethods
     end
     
     module ClassMethods
       
-      def authorizable
+      def authorizable(options={})
+        badges_options.merge!(options)
+
         include Badges::Authorizable::InstanceMethods
-        
+
         singleton_class.class_eval do
           def accepts_privilege?(privilege, authorized=nil)
             authorized ||= (current_user || Anonymous.instance)
@@ -19,28 +24,12 @@ module Badges
         
       end
       
-      def badges_class_name
-        if self.respond_to?('base_class')
-          self.base_class.name
-        else
-          self.name
-        end
-      end
-
     end
     
     module InstanceMethods
       
-      def badges_id
-        self.id
-      end
-
-      def badges_class_name
-        self.class.badges_class_name
-      end
-
       # this is the list of user roles on this instance
-      def authorizations
+      def authorizations_on
         engine.authorizations_on(self)
       end
       # alias :user_roles :roles
@@ -64,7 +53,7 @@ module Badges
       end
       
       def members_by_role
-        authorizations.inject({}) do |groups, auth|
+        authorizations_on.inject({}) do |groups, auth|
           groups[auth.role] = [] if groups[auth.role].nil?
           groups[auth.role] << auth.by
           groups
@@ -73,9 +62,9 @@ module Badges
 
       def members(role=nil)
         result = unless role
-          authorizations.collect{|auth| auth.by }
+          authorizations_on.collect{|auth| auth.by }
         else
-          authorizations.inject([]){|l, auth| l << auth.by if (auth.role.to_sym == role.to_sym) }
+          authorizations_on.inject([]){|l, auth| l << auth.by if (auth.role.to_sym == role.to_sym) }
         end
         result.uniq
       end

@@ -14,31 +14,33 @@ describe Badges::Storage::ActiveRecordStore do
   end
   
   it 'lists roles' do
-    Badges::Storage::ActiveRecord::Role.create(:name=>'lists roles')
-    @ar_store.roles.should == ['lists roles']
+    role = Badges::Storage::ActiveRecord::Role.create(:name=>'lists roles')
+    privilege = Badges::Storage::ActiveRecord::Privilege.create(:name=>'privilege')
+    Badges::Storage::ActiveRecord::RolePrivilege.create(:role=>role, :privilege=>privilege)
+    @ar_store.roles.should == {'lists roles'=>['privilege']}
   end
 
   it 'adds a role' do
-    @ar_store.roles.should == []
+    @ar_store.role_names.should == []
     @ar_store.add_role('adds a role')
-    @ar_store.roles.should == ['adds a role']
+    @ar_store.role_names.should == ['adds a role']
 
     @ar_store.add_role('adds a role')
-    @ar_store.roles.should == ['adds a role']
+    @ar_store.role_names.should == ['adds a role']
   end
 
   it 'adds a role, but only once' do
-    @ar_store.roles.should == []
+    @ar_store.role_names.should == []
     @ar_store.add_role('adds a role')
     @ar_store.add_role('adds a role')
-    @ar_store.roles.should == ['adds a role']
+    @ar_store.role_names.should == ['adds a role']
   end
 
   it 'deletes roles' do
     Badges::Storage::ActiveRecord::Role.create(:name=>'deletes roles')
-    @ar_store.roles.should == ['deletes roles']
+    @ar_store.role_names.should == ['deletes roles']
     @ar_store.delete_role('deletes roles')
-    @ar_store.roles.should == []
+    @ar_store.role_names.should == []
   end
 
   it 'lists privileges' do

@@ -2,9 +2,11 @@
 # puts "loading Badges:Storage:Test"
 require 'badges/storage/abstract'
 
+puts "Loading TestStore"
+
 module Badges
   module Storage
-    class Test < Abstract
+    class TestStore < Abstract
       
       attr_writer :roles, :by_roles, :on_roles
       

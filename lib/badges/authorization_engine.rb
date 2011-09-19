@@ -11,7 +11,6 @@ module Badges
       storage_type = options[:storage] || Badges::Configuration.storage || :active_record
       require "badges/storage/#{storage_type}_store"
       storage_class_name = "Badges::Storage::#{storage_type.to_s.camelize}Store"
-      puts "storage_class_name: #{storage_class_name}"
       storage_class = storage_class_name.constantize
       @storage = storage_class.new(options)
     end
@@ -31,11 +30,25 @@ module Badges
     def has_privilege?(privilege, authorized=nil, authorizable=nil)
       privilege = privilege.to_s
       add_if_missing(privilege)
+      authorized ||= Anonymous.instance
       
+      # first check to see if the authorized returns a list of roles on the authorizable
+      # this should include the default role, and any additional roles derived from logic in the authorized model
+      allowed_roles = role_lookup[privilege] || []
+      model_auth_roles = model_authorized_roles(authorized, authorizable)
+      return true if model_auth_roles.detect{|authorized_role| allowed_roles.include?(authorized_role)}
+
+      # if not these default and roles defined by the model, then look-up the priv as defined in badges
       privileges = privilege_lookup(authorized)[privilege] || {}
       on = authorizable ? privileges[authorizable_class_name(authorizable)] || [] : []
       
       privileges[:all] || (on.include?(:all) || (authorizable && !authorizable.is_a?(Class) && on.include?(authorizable.id)))
+    end
+    
+    def model_authorized_roles(authorized, authorizable)
+      if authorized.respond_to?(:something)
+      end
+      []
     end
     
     def authorizable_class_name(authorizable)
@@ -56,7 +69,11 @@ module Badges
     end
 
     def authorized_roles(authorized)
-      authorized ? @storage.find_authorized_roles(authorized) : anonymous_roles
+      if !authorized || authorized.is_a?(Anonymous)
+        anonymous_roles
+      else
+        @storage.find_authorized_roles(authorized)
+      end
     end
 
     # use these for caching, need to abstract this stuff
@@ -136,7 +153,23 @@ module Badges
       end
       
       result
-      
+    end
+    
+    def role_lookup
+      # this is a wrapper for caching purposes - remind me to do that
+      @_role_lookup = create_role_lookup
+    end
+    
+    def create_role_lookup
+      result = {}
+      @storage.roles.keys.each do |role_name|
+        role_privileges = @storage.roles[role_name]
+        role_privileges.each do |privilege|
+          result[privilege] = [] if result[privilege].nil?
+          result[privilege] << role_name
+        end
+      end
+      result
     end
 
     def replace_instances(roles, key)
