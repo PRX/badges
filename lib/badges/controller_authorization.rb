@@ -40,11 +40,11 @@ module Badges
     # takes all the same options as the class method above except for :only and :except
     # defaults to :redirect is true
     def privilege_required(privilege, options={})
-      # logger.error("privilege_required start!")
+      # puts("privilege_required start!")
       user = get_by_method_or_attribute(options[:user])
-      # logger.error("user = #{user.inspect}")
+      # puts("user = #{user.inspect}")
       authorizable = get_authorizable_object(options)
-      # logger.error("authorizable = #{authorizable.inspect}")
+      # puts("authorizable = #{authorizable.inspect}")
 
       privileges = privilege.is_a?(Array) ? privilege : [privilege]
       if (privileges.detect{|p| !has_privilege?(p, authorizable, user)}).nil?
@@ -100,7 +100,7 @@ module Badges
       authorizable = nil
       if options.include?(:param)
         if options.include?(:on) && options[:on].is_a?(Class)
-          authorizable = options[:on].send(:find, params[options[:param].to_s])
+          options[:on].find(params[options[:param]])
         else
           raise 'To use :param, you must include an :on option that specifies an AR class'
         end

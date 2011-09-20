@@ -53,18 +53,12 @@ describe Badges::AuthorizationEngine do
   end
   
   it "returns authorizable objects for user, class w/finder and privilege" do
-    Account.class_eval do
-      def self.find(id)
-        Account.new(1)
-      end
-    end
-    
-    engine.authorizables(User.new(2), Account, :delete).should == Account.new(1)
+    engine.authorizables(User.new(2), Account, :delete).should == [Account.new(1)]
   end
   
   it "grants a new global role" do
     @user = User.new(4)
-    @user.authorizations.should == []
+    @user.authorizations_by.should == []
     engine.grant_role(:super_user, @user)
     @user.roles_on.should == [:super_user]
   end

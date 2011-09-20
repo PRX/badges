@@ -48,7 +48,7 @@ describe Badges::Authorized do
     @account = Account.new(4)
     @user = User.new(4)
 
-    @user.authorizations_on.should == []
+    @user.authorizations_by.should == []
 
     @account.role_granted(:super_user, @user)
 

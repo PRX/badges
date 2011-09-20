@@ -13,6 +13,7 @@ module Badges
       def authorizable(options={})
         badges_options.merge!(options)
 
+        include Badges::ModelExtensions::InstanceMethods unless (self.kind_of?(Badges::ModelExtensions::InstanceMethods))
         include Badges::Authorizable::InstanceMethods
 
         singleton_class.class_eval do

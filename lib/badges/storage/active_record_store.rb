@@ -18,13 +18,6 @@ module Badges
       
       AuthorizationClass = Badges::Storage::ActiveRecord::Authorization
       
-      def self.find_instances(model_class, ids)
-        if model_class.respond_to?(:where)
-        else
-          model_class.find(:all, :condition=>[model_class.])
-        end
-      end
-
       def initialize(options={})
         super
       end
@@ -95,8 +88,8 @@ module Badges
         auths = AuthorizationClass.find(:all, :conditions=>attributes_hash)
         AuthorizationClass.create(attributes_hash) if auths.blank?
         true
-      rescue
-        false
+      # rescue
+      #   false
       end
       
       def revoke_role(role_symbol, authorized, authorizable=nil)

@@ -15,6 +15,7 @@ module Badges
       def authorized(options={})
         badges_options.merge!(options)
         @badges_model_role_checks = {}
+        include Badges::ModelExtensions::InstanceMethods unless (self.kind_of?(Badges::ModelExtensions::InstanceMethods))
         include Badges::Authorized::InstanceMethods
       end
       
@@ -84,6 +85,10 @@ module Badges
       
       def badges_model_role_checks
         self.class.badges_model_role_checks
+      end
+      
+      def default_roles
+        Badges::Configuration.default_user_role
       end
       
       def model_roles_on(authorizable)

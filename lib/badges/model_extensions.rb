@@ -1,3 +1,5 @@
+require 'active_record'
+
 module Badges
   module ModelExtensions
 
@@ -6,6 +8,17 @@ module Badges
     end
     
     module ClassMethods
+      
+      def badges_find(ids)
+        if self <= ::ActiveRecord::Base
+          Array(self.find(:all, :conditions=>{self.badges_id_attribute=>ids}))
+        elsif self.respond_to?(:find)
+          Array(self.find(ids))
+        else 
+          # logger.error 'only active record supported at the moment, sorry.'
+          []
+        end
+      end
       
       def badges_options
         @badges_options ||= {}

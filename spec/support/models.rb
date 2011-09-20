@@ -1,6 +1,6 @@
 require 'active_support'
 
-class TestModel
+class TestModel < Object
   attr_accessor :id
   include Badges::Authorized
   include Badges::Authorizable
@@ -15,19 +15,19 @@ class TestModel
     @id == b.id
   end
   
-  def self.find ids
-    if ids.is_a?(Array)
-      ids.collect{|i| self.new(i)}
-    else
-      self.new(ids)
+  class << self
+
+    def find(ids=nil)
+      Array(ids).collect{|i| self.new(i)}
     end
+
   end
-  
+
 end
 
 class User < TestModel
   authorized
-  authorizable
+  # authorizable
 end
 
 class Account < TestModel

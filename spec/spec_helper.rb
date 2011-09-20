@@ -20,6 +20,7 @@ end
 Badges::Configuration.define do |config| 
   config.storage = :test
   config.anonymous_role = :anonymous
+  config.default_user_role = nil
 end
 
 def engine

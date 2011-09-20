@@ -68,7 +68,7 @@ module Badges
       if !authorized || authorized.is_a?(Anonymous)
         anonymous_roles
       else
-        @storage.find_authorized_roles(authorized)
+        default_roles + @storage.find_authorized_roles(authorized)
       end
     end
 
@@ -76,6 +76,11 @@ module Badges
     def anonymous_roles
       #  should it set authorized to Badges::Anonymous.instance?
       Badges::Configuration.anonymous_role ? [{:role=>Badges::Configuration.anonymous_role}] : []
+    end
+
+    def default_roles
+      #  should it set authorized to Badges::Anonymous.instance?
+      Badges::Configuration.default_user_role ? [{:role=>Badges::Configuration.default_user_role}] : []
     end
 
     def authorizable_roles(authorizable)
@@ -98,7 +103,8 @@ module Badges
       end
       ids.uniq!
       # if the class supports find(id), as AR and Mongoid both do. Otherwise, return ids.
-      authorized_class.respond_to?(:find) ? authorized_class.find(ids) : ids
+      instances = find_class_instances(authorized_class, ids)
+      instances.blank? ? ids : instances
     end
     
     def authorizables(authorized, authorizable_class, privilege=nil)
@@ -119,7 +125,8 @@ module Badges
       end
       ids.uniq!
       # if the class supports find(id), as AR and Mongoid both do. Otherwise, return ids.
-      authorizable_class.respond_to?(:find) ? authorizable_class.find(ids) : ids
+      instances = find_class_instances(authorizable_class, ids)
+      instances.blank? ? ids : instances
     end
     
     # this should look up in a cache - using just a plain jane memoized attribute for now.
@@ -167,7 +174,7 @@ module Badges
       end
       result
     end
-
+    
     def replace_instances(roles, key)
       # puts "replace_instances roles:#{roles.inspect}, key:#{key}"
       by_class = roles.inject({}) do |groups, auth|
@@ -187,17 +194,25 @@ module Badges
         groups
       end
       
-      # puts "by_class = #{by_class.inspect}"
-
       by_class.keys.each do |name|
         ids = by_class[name].keys
         klass = name.constantize
-        instances = klass.respond_to?(:find) ? Array(klass.find(ids)) : []
+        instances = find_class_instances(klass, ids)
         # puts "instances: #{instances.inspect}"
         instances.each{|i| by_class[name][i.id].each{ |a| a[key] = i } }
       end
-
+      
       roles
+    end
+    
+    def find_class_instances(klass, ids)
+      if klass.respond_to?(:badges_find)
+        klass.badges_find(ids)
+      elsif klass.respond_to?(:find)
+        Array(klass.find(ids))
+      else
+        raise "No find operation found for #{klass.name}"
+      end
     end
     
     def add_if_missing(privilege)
