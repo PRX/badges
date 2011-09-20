@@ -12,6 +12,7 @@ module Badges
   autoload :ModelExtensions, 'badges/model_extensions'
   autoload :Authorized, 'badges/authorized'
   autoload :Authorization, 'badges/authorization'
+  autoload :ModelRoleCheck, 'badges/model_role_check'
   autoload :Anonymous, 'badges/anonymous'
   autoload :ModelAuthorization, 'badges/model_authorization'
   autoload :ControllerAuthorization, 'badges/controller_authorization'

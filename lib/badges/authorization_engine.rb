@@ -35,20 +35,16 @@ module Badges
       # first check to see if the authorized returns a list of roles on the authorizable
       # this should include the default role, and any additional roles derived from logic in the authorized model
       allowed_roles = role_lookup[privilege] || []
-      model_auth_roles = model_authorized_roles(authorized, authorizable)
-      return true if model_auth_roles.detect{|authorized_role| allowed_roles.include?(authorized_role)}
+      model_auth_roles = authorized.model_roles_on(authorizable)
+      
+      # puts "model_auth_roles: #{model_auth_roles.inspect}"
+      return true if model_auth_roles.detect{|authorized_role| allowed_roles.include?(authorized_role.to_s)}
 
       # if not these default and roles defined by the model, then look-up the priv as defined in badges
       privileges = privilege_lookup(authorized)[privilege] || {}
       on = authorizable ? privileges[authorizable_class_name(authorizable)] || [] : []
       
       privileges[:all] || (on.include?(:all) || (authorizable && !authorizable.is_a?(Class) && on.include?(authorizable.id)))
-    end
-    
-    def model_authorized_roles(authorized, authorizable)
-      if authorized.respond_to?(:something)
-      end
-      []
     end
     
     def authorizable_class_name(authorizable)

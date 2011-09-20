@@ -39,6 +39,10 @@ describe Badges::Authorized do
   it "has privilege from global role" do
     Account.new.should be_accepts_privilege(:edit, User.new(1))
   end
+
+  it "has privilege from class role" do
+    Account.should be_accepts_privilege(:delete, User.new(3))
+  end
   
   it "grants a role" do
     @account = Account.new(4)

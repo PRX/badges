@@ -2,8 +2,6 @@
 # puts "loading Badges:Storage:Test"
 require 'badges/storage/abstract'
 
-puts "Loading TestStore"
-
 module Badges
   module Storage
     class TestStore < Abstract

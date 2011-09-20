@@ -5,7 +5,8 @@ describe Badges::Authorized do
   before(:each) do 
     engine.storage.roles =  { 'anonymous' =>['view'],
                 'member'    =>['view','edit'],
-                'admin'     =>['view','edit','delete'] }
+                'admin'     =>['view','edit','delete'],
+                'model_admin' =>['twiddle'] }
                 
     engine.storage.by_roles = {
       '1' => [{:role=>'admin'}, {:role=>'member'}],
@@ -26,15 +27,26 @@ describe Badges::Authorized do
     User.class_eval do
       has_role(:model_admin, Account) {|user, account| account.owner == user}
     end
-    User.badges_model_class_roles.keys.size.should eql(1)
-    User.badges_model_class_roles['Account'].size.should eql(1)
+
+    User.badges_model_role_checks.keys.size.should eql(1)
+    User.badges_model_role_checks['Account'].size.should eql(1)
 
     User.class_eval do
       has_role(:model_member, Account) {|user, account| account.id == user.id}
     end
 
-    User.badges_model_class_roles.keys.size.should eql(1)
-    User.badges_model_class_roles['Account'].size.should eql(2)
+    User.badges_model_role_checks.keys.size.should eql(1)
+    User.badges_model_role_checks['Account'].size.should eql(2)
+
+    # puts "User.badges_model_role_checks: #{User.badges_model_role_checks.inspect}"
+
+    user = User.new(5)
+    account = Account.new(1)
+    user.should_not have_privilege('twiddle', account)
+
+    account.owner = user
+    user.should have_privilege('twiddle', account)
+    
   end
 
   it "adds methods to user instances" do

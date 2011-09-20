@@ -10,24 +10,20 @@ module Badges
 
     module ClassMethods
       
-      attr_reader :badges_model_class_roles
+      attr_reader :badges_model_role_checks
 
       def authorized(options={})
         badges_options.merge!(options)
-        @badges_model_class_roles = {}
+        @badges_model_role_checks = {}
         include Badges::Authorized::InstanceMethods
       end
       
       # declare that an instance of this authorized will have a role on the authorizable if the block is true
       def has_role(role_name, authorizable_class, &block)
-        badges_model_class_roles[authorizable_class.name] = [] if badges_model_class_roles[authorizable_class.name].nil?
-        badges_model_class_roles[authorizable_class.name] << block
+        badges_model_role_checks[authorizable_class.name] = [] if badges_model_role_checks[authorizable_class.name].nil?
+        badges_model_role_checks[authorizable_class.name] << Badges::ModelRoleCheck.new(role_name.to_s, authorizable_class, &block)
       end
       
-      def model_roles_on(authorizable)
-        badges_model_class_roles[authorizable_class.name].each{|block| block.call(self, authorizable)}
-      end
-
       def badges_class_name
         if self.respond_to?('base_class')
           self.base_class.name
@@ -43,15 +39,7 @@ module Badges
     end
 
     module InstanceMethods
-      
-      def badges_id
-        self.call(badges_id_attribute)
-      end
 
-      def badges_class_name
-        self.class.badges_class_name
-      end
-      
       # return list of roles, and what they are on
       def authorizations_by
         engine.authorizations_by(self)
@@ -94,6 +82,33 @@ module Badges
 
       # private
       
+      def badges_model_role_checks
+        self.class.badges_model_role_checks
+      end
+      
+      def model_roles_on(authorizable)
+        return [] unless authorizable
+        return [] if authorizable.is_a?(Class)
+        
+        class_name = if authorizable.respond_to?('badges_class_name')
+          authorizable.badges_class_name
+        else
+          authorizable.class.name
+        end
+        
+        checks = badges_model_role_checks[class_name] || []
+        
+        # puts "model_roles_on: class_name:#{class_name} checks:#{checks.inspect}"
+        roles = checks.inject([]){|r, check|
+          if check.pass?(self, authorizable)
+            r << check.role_name.to_s
+          end
+          r
+        }
+        # puts "model_roles_on: roles: #{roles.inspect}"
+        roles.compact.uniq
+      end
+
       def is_user_role_on_all?(user_role, authorizable=nil)
         authorizable.nil? && !user_role[:on]
       end

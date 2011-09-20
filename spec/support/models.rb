@@ -1,3 +1,5 @@
+require 'active_support'
+
 class TestModel
   attr_accessor :id
   include Badges::Authorized
@@ -29,7 +31,6 @@ class User < TestModel
 end
 
 class Account < TestModel
-  authorizable
-  
+  authorizable  
   attr_accessor :owner
 end
